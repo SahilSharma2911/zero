@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Righteous } from "next/font/google";
+import { Inter, Righteous } from "next/font/google";
 
 // Initialize the font
 const righteous = Righteous({
@@ -9,6 +9,12 @@ const righteous = Righteous({
   variable: '--font-righteous',
   display: 'swap',
 });
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -21,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${righteous.variable}`}>
+    <html lang="en" className={`${righteous.variable} ${inter.variable} `}>
       <body className="font-sans">
         {children}
       </body>

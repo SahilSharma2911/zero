@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Righteous&display=swap');
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -5,6 +7,11 @@
 
 @theme{
   --font-Righteous:var(--font-righteous);
+  --font-Inter:var(--font-inter);
+  --color-lightBtn:#636AE8FF;
+  --color-darkBlueBtn:#636ae8e7;
+  --color-text:#565E6CFF;
+  --color-lightRedText:#AB8572FF;
   
 }
 
@@ -125,3 +132,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+*{
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+}
+
+

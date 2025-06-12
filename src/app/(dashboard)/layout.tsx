@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Menu from "@/components/Menu/Menu";
 import Navbar from "@/components/Navbar/Navbar";
+import Image from "next/image";
 
 
 
@@ -14,26 +15,26 @@ export default function RootLayout({
   return (
     <div className="h-screen flex">
       {/* Left side  */}
-      <div className="w-[14%] md:w-[8%] lg:w-[16%] xl:w-[14%] p-2 lg:p-4 bg-red-300">
-        <Link href="/" className=" flex items-center ">
+      <div className="w-[14%] md:w-[8%] lg:w-[14%] xl:w-[16%] border-r  ">
+        <Link href="/" className=" flex items-center gap-2 p-2 lg:p-4 ">
           <span className="">
-            {/* <Image
-              src={Logo}
+            <Image
+              src={"/images/logo.jpg"}
               alt=""
               width={100}
               height={100}
-              className="w-14 "
-            /> */}
+              className="w-10 rounded-md "
+            />
           </span>
-          <span className="hidden lg:block font-Poppins font-bold ">
-            CampusPilot
+          <span className="hidden lg:block font-bold font-Inter ">
+            Zero Dimensions
           </span>
         </Link>
         <Menu />
       </div>
 
       {/* right side  */}
-      <div className=" w-[86%] md:w-[92%] lg:w-[84%] xl:w-[86%] bg-[#F7F8FA] overflow-scroll ">
+      <div className=" w-[86%] md:w-[92%] lg:w-[84%] xl:w-[86%] ">
         <Navbar />
         {children}
       </div>
