@@ -3,10 +3,10 @@ import {
   dashboardUsersTableDataProps,
 } from "@/assets/Data";
 import React from "react";
-import TableComponent from "../TableComponent";
-import { TableCell, TableRow } from "../ui/table";
+import TableComponent from "../../TableComponent";
+import { TableCell, TableRow } from "../../ui/table";
 import Image from "next/image";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 
 interface columnsProps {
   header: string;

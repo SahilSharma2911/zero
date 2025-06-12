@@ -1,6 +1,6 @@
 import React from "react";
-import DashboardUsers from "@/components/Admin/DashboardUsers";
-import DashboardBar from "@/components/Admin/DashboardBar";
+import DashboardUsers from "@/components/Admin/dashboard/DashboardUsers";
+import DashboardBar from "@/components/Admin/dashboard/DashboardBar";
 
 const AdminDashboardPage = () => {
   return (

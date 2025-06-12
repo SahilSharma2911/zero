@@ -8,11 +8,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { Button } from "../ui/button";
+} from "../../ui/select";
+import { Button } from "../../ui/button";
 import { Funnel, Plus, SortDescIcon, Table, User } from "lucide-react";
 import { FaEllipsisH } from "react-icons/fa";
-import Popup from "../Modal/Popup";
+import Popup from "../../Modal/Popup";
 import AddTaskForm from "./AddTaskForm";
 
 const DashboardBar = () => {
@@ -86,7 +86,7 @@ const DashboardBar = () => {
 
       {/*------------------Add task Pop up -------------------  */}
 
-      <Popup openModal={open} content={<AddTaskForm/>} />
+      <Popup openModal={open} content={<AddTaskForm setOpen={setOpen} />} />
     </>
   );
 };
