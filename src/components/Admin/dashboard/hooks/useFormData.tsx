@@ -1,10 +1,5 @@
 import { useCallback, useState } from "react";
 
-type TagType = {
-  id: string;
-  name: string;
-  color: string;
-};
 
 type SubTask = {
   id: string;
@@ -21,11 +16,7 @@ type FeedbackProps = {
   color: string;
 };
 
-const availableTags: TagType[] = [
-  { id: "1", name: "Tag 1", color: "bg-blue-100 text-blue-800" },
-  { id: "2", name: "Tag 2", color: "bg-green-100 text-green-800" },
-  { id: "3", name: "Tag 3", color: "bg-purple-100 text-purple-800" },
-];
+
 
 const availableFeedback: FeedbackProps[] = [
   { id: "1", name: "Good", color: "bg-green-500" },
@@ -34,13 +25,7 @@ const availableFeedback: FeedbackProps[] = [
 ];
 
 const useFormData = () => {
-  //--------------------- DueDate Component data details------------------
-  const [date, setDate] = useState<Date | undefined>();
-
-  // Handle date selection and auto-close calendar
-  const handleDateSelect = useCallback((selectedDate: Date | undefined) => {
-    setDate(selectedDate);
-  }, []);
+  
 
   //----------------------Sub Task Component data details------------------
   const [subTasks, setSubTasks] = useState<SubTask[]>([]);
@@ -85,28 +70,10 @@ const useFormData = () => {
     setSubTasks(prev => prev.filter(task => task.id !== id));
   }, []);
 
-  // ---------------------------------Tags related data---------------------------------
-  const [openTag, setOpenTag] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<TagType[]>([]);
-
-  const handleTagSelect = useCallback((tag: TagType) => {
-    setSelectedTags(prev => {
-      if (prev.some(t => t.id === tag.id)) {
-        return prev.filter(t => t.id !== tag.id);
-      }
-      return [...prev, tag];
-    });
-  }, []);
-
-  const handleRemoveTag = (tagId: string) => {
-    setSelectedTags(prevTags => prevTags.filter(tag => tag.id !== tagId));
-  };
+  
 
   return {
-    dueDateData: {
-      date,
-      handleDateSelect,
-    },
+   
     subTasksData: {
       availableFeedback,
       subTasks,
@@ -121,14 +88,7 @@ const useFormData = () => {
       removeSubTask,
       toggleSubTaskCompletion, // Added this
     },
-    tagsData: {
-      openTag,
-      setOpenTag,
-      availableTags,
-      selectedTags,
-      handleTagSelect,
-      handleRemoveTag,
-    },
+    
   };
 };
 

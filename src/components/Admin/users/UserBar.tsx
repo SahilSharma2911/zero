@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -14,10 +13,11 @@ import { Plus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import AddUserForm from "./AddUserForm";
 import Popup from "@/components/Modal/Popup";
+import { useAppContext } from "@/Context/AppContext";
 // import Popup from '@/components/Modal/Popup';
 
 const UserBar = () => {
-  const [open, setOpen] = useState<boolean>(false);
+  const { open, setOpen } = useAppContext();
 
   return (
     <>
@@ -53,19 +53,19 @@ const UserBar = () => {
         </div>
 
         {/*------------------- right side section ------------------  */}
-          <div className=" flex relative">
-            <Search className=" absolute top-1/2 -translate-y-1/2 left-2 text-text" />
-            <Input
-              placeholder="Search by email"
-              type="email"
-              className=" !border rounded-md p-2 pl-10 w-full"
-            />
-          </div>
+        <div className=" flex relative">
+          <Search className=" absolute top-1/2 -translate-y-1/2 left-2 text-text" />
+          <Input
+            placeholder="Search by email"
+            type="email"
+            className=" !border rounded-md p-2 pl-10 w-full"
+          />
+        </div>
       </div>
 
       {/*------------------Add task Pop up -------------------  */}
 
-      <Popup openModal={open} content={<AddUserForm setOpen={setOpen} />} />
+      <Popup openModal={open} content={<AddUserForm />} />
     </>
   );
 };

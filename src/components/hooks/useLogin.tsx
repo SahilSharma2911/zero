@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -25,25 +26,31 @@ const useLogin = () => {
   const onSubmit = async (data: LoginFormProps) => {
     const toastId = toast.loading("Logging in...");
     try {
+
       const response = await axios.post(
         "https://task-management-backend-kohl-omega.vercel.app/api/auth/login-company-admin",
         data
       );
-      // Store the response data properly
+
       const adminData = response.data?.data;
+
+      console.log("login data is here",adminData)
 
       const cookieData = {
         id: adminData.id,
         name: adminData.name,
         email: adminData.email,
         token: adminData.token,
+        role: adminData.role,
       };
 
       Cookies.set("adminData", JSON.stringify(cookieData), { expires: 7 });
       Cookies.set("token", adminData.token, { expires: 7 });
       router.push("/admin/dashboard");
       toast.success("Login successful!", { id: toastId });
-    } catch (error: any) {
+
+
+    } catch (error:any) {
       let errorMessage = "Login failed";
       if (error.response) {
         errorMessage = error.response.data.message || errorMessage;

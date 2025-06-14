@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Send, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
 type Comment = {
   id: string;

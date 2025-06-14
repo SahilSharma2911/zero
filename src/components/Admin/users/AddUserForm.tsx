@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 // import {
@@ -15,78 +14,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { X } from "lucide-react";
-// import React, { useCallback, useState } from "react";
-// import { motion } from "framer-motion";
-import { useForm } from "react-hook-form";
-import axios from "axios";
-import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import { useAppContext } from "@/Context/AppContext";
 
-interface FormValues {
-  name: string;
-  email: string;
-  password: string;
-  priority: string;
-  companyAdminId?: string;
-}
+import useAddUser from "@/components/hooks/useAddUser";
 
-const AddUserForm = ({
-  setOpen,
-}: {
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}) => {
-  const { adminData } = useAppContext();
-
-  
-
-  const router = useRouter();
-
+const AddUserForm = () => {
   const {
     register,
+    onSubmit,
+    setOpen,
     handleSubmit,
     setValue,
-    formState: { errors, isSubmitting },
-  } = useForm<FormValues>({
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      priority: "",
-    },
-  });
-
-  const onSubmit = async (data: FormValues) => {
-    const actualData = {
-      name: data?.name,
-      email: data?.email,
-      password: data?.password,
-      priority: parseInt(data?.priority),
-      companyAdminId: adminData?.id,
-    };
-
-    console.log("actualdaa ", actualData);
-
-    const toastId = toast.loading("Creating user...");
-    try {
-      const response = await axios.post(
-        "https://task-management-backend-kohl-omega.vercel.app/api/auth/register-user",
-        actualData
-      );
-
-      console.log("response is here", response);
-
-      toast.success("User created successfully!", { id: toastId });
-      setOpen(false);
-      // Optional: redirect or refresh data
-      router.refresh();
-    } catch (error: any) {
-      console.error("Registration error:", error);
-      const errorMessage =
-        error.response?.data?.message || "Failed to create user";
-      toast.error(errorMessage, { id: toastId });
-    }
-  };
+    errors,
+    isSubmitting,
+  } = useAddUser();
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-4">
