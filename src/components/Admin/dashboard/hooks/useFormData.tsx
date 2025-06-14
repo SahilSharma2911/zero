@@ -8,6 +8,7 @@ type TagType = {
 
 type SubTask = {
   id: string;
+  completed: boolean;
   name: string;
   assignedTo: string;
   feedback: boolean;
@@ -42,74 +43,63 @@ const useFormData = () => {
   }, []);
 
   //----------------------Sub Task Component data details------------------
-
   const [subTasks, setSubTasks] = useState<SubTask[]>([]);
-  const[assignTo,setAssignTo]=useState<string>("")
-  const[taskName,setTaskName]=useState<string>("")
-
+  const [assignTo, setAssignTo] = useState<string>("");
+  const [taskName, setTaskName] = useState<string>("");
   const [selectedFeedback, setSelectedFeedback] = useState<FeedbackProps[]>([]);
 
   const handleFeedbackChange = (feedback: FeedbackProps) => {
-  setSelectedFeedback(prev => {
-    // If this feedback is already selected, clear selection
-    if (prev.some(item => item.id === feedback.id)) {
-      return [];
-    }
-    // Otherwise replace with new feedback
-    return [feedback];
-  });
-};
+    setSelectedFeedback(prev => {
+      if (prev.some(item => item.id === feedback.id)) {
+        return [];
+      }
+      return [feedback];
+    });
+  };
+
+  // Toggle subtask completion
+  const toggleSubTaskCompletion = useCallback((id: string) => {
+    setSubTasks(prev => 
+      prev.map(task => 
+        task.id === id ? { ...task, completed: !task.completed } : task
+      )
+    );
+  }, []);
 
   // Add new subtask
   const addSubTask = useCallback((e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent form submission
+    e.preventDefault();
     const newSubTask: SubTask = {
       id: Date.now().toString(),
+      completed: false,
       name: "",
       assignedTo: "",
       feedback: false,
       time: "1 hour",
     };
-    setSubTasks((prev) => [...prev, newSubTask]);
+    setSubTasks(prev => [...prev, newSubTask]);
   }, []);
-
-  //   // Update subtask field
-  //   const updateSubTask = useCallback(
-  //     (id: string, field: keyof SubTask, value: string | boolean) => {
-  //       setSubTasks((prev) =>
-  //         prev.map((task) =>
-  //           task.id === id ? { ...task, [field]: value } : task
-  //         )
-  //       );
-  //     },
-  //     []
-  //   );
 
   // Remove subtask
   const removeSubTask = useCallback((id: string) => {
-    setSubTasks((prev) => prev.filter((task) => task.id !== id));
+    setSubTasks(prev => prev.filter(task => task.id !== id));
   }, []);
 
   // ---------------------------------Tags related data---------------------------------
   const [openTag, setOpenTag] = useState(false);
-
   const [selectedTags, setSelectedTags] = useState<TagType[]>([]);
 
-  // Handle tag selection
   const handleTagSelect = useCallback((tag: TagType) => {
-    setSelectedTags((prev) => {
-      // If tag is already selected, remove it
-      if (prev.some((t) => t.id === tag.id)) {
-        return prev.filter((t) => t.id !== tag.id);
+    setSelectedTags(prev => {
+      if (prev.some(t => t.id === tag.id)) {
+        return prev.filter(t => t.id !== tag.id);
       }
-      // Otherwise add it
       return [...prev, tag];
     });
-    // Don't close the popover after selection
   }, []);
 
-  const handleRemoveTag = (tagId: number | string) => {
-    setSelectedTags((prevTags) => prevTags.filter((tag) => tag.id !== tagId));
+  const handleRemoveTag = (tagId: string) => {
+    setSelectedTags(prevTags => prevTags.filter(tag => tag.id !== tagId));
   };
 
   return {
@@ -117,19 +107,20 @@ const useFormData = () => {
       date,
       handleDateSelect,
     },
-
     subTasksData: {
       availableFeedback,
       subTasks,
       selectedFeedback,
-       setSelectedFeedback,
+      setSelectedFeedback,
       handleFeedbackChange,
-      assignTo,setAssignTo,
-      addSubTask,
+      assignTo,
+      setAssignTo,
+      taskName,
       setTaskName,
+      addSubTask,
       removeSubTask,
+      toggleSubTaskCompletion, // Added this
     },
-
     tagsData: {
       openTag,
       setOpenTag,

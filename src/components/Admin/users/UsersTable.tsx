@@ -1,11 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import { userTableData, userTableDataProps } from "@/assets/Data";
 import TableComponent from "@/components/TableComponent";
-import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import React, { useState } from "react";
-
+import { CiEdit } from "react-icons/ci";
 interface columnsProps {
   header: string;
   accessor: string;
@@ -13,6 +13,11 @@ interface columnsProps {
 }
 
 const columns: columnsProps[] = [
+  {
+    header:"",
+    accessor: "image",
+    classes: "hidden md:table-cell text-center",
+  },
   {
     header: "Name",
     accessor: "name",
@@ -50,6 +55,10 @@ const UsersTable = () => {
       key={item.id}
       className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
     >
+      <TableCell className="hidden md:table-cell  ">
+        <div className="w-3 h-3 rounded-full bg-green-500 "></div>
+      </TableCell>
+
       <TableCell className="flex items-center gap-4  ">
         <div className="flex flex-col">
           <h3 className="font-semibold">{item.name}</h3>
@@ -61,9 +70,17 @@ const UsersTable = () => {
 
       <TableCell className=" text-center">
         <div>
-          <button className=" bg-green-500 text-white text-xs rounded p-1">
+          <div className=" flex gap-4 items-center justify-center">
+            <button className=" bg-green-500 text-white text-xs rounded p-1">
             {btnState}
           </button>
+           <button className=" bg-transparent border border-[#513600FF] hover:bg-red-500 hover:text-white hover:cursor-pointer font-medium  text-[#513600FF] text-xs rounded p-1">
+            Delete
+          </button>
+           <button className=" text-text text-2xl hover:font-bold hover:cursor-pointer" >
+            <CiEdit/>
+          </button>
+          </div>
         </div>
       </TableCell>
     </TableRow>

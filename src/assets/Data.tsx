@@ -31,6 +31,13 @@ export interface userTableDataProps {
   teamMembers: string;
 }
 
+export interface tagsTableDataProps {
+  id: number;
+  name: string;
+  color: string;
+
+}
+
 export const menuItems: MenuItem[] = [
   {
     icon: <MdOutlineDashboard />,
@@ -107,3 +114,16 @@ export const userTableData: userTableDataProps[] = [
     teamMembers: "3",
   },
 ];
+
+export const tagsTableData:tagsTableDataProps[] = [
+  {
+    id: 1,
+    name: "#tag1",
+    color: "bg-[#EA916EFF]",
+  },
+  {
+    id: 2,
+    name: "#tag2",
+    color: "bg-[#22CCB2FF]",
+  }
+]

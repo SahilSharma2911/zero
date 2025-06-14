@@ -1,20 +1,22 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Inter, Righteous } from "next/font/google";
+import { Toaster } from "react-hot-toast";
+import { AppContextProvider } from "@/Context/AppContext";
 
 // Initialize the font
 const righteous = Righteous({
   weight: "400",
-  subsets: ['latin'],
-  variable: '--font-righteous',
-  display: 'swap',
+  subsets: ["latin"],
+  variable: "--font-righteous",
+  display: "swap",
 });
 
 const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-})
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -29,7 +31,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${righteous.variable} ${inter.variable} `}>
       <body className="font-sans">
-        {children}
+        <AppContextProvider>
+          <Toaster />
+          {children}
+        </AppContextProvider>
       </body>
     </html>
   );

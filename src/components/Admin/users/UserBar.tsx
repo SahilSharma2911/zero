@@ -48,7 +48,7 @@ const UserBar = () => {
             className=" bg-lightBtn hover:bg-darkBlueBtn hover:scale-95 hover:cursor-pointer"
           >
             <Plus />
-            Add task
+            Add User
           </Button>
         </div>
 

@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectGroup,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "../../ui/select";
 import { Button } from "../../ui/button";
 import { Funnel, Plus, SortDescIcon, Table, User } from "lucide-react";
 import { FaEllipsisH } from "react-icons/fa";
@@ -22,10 +22,12 @@ const DashboardBar = () => {
     <>
       <div className=" flex justify-between items-center px-8">
         {/*------------------- left side section ------------------  */}
-        <div className=" flex items-center gap-2">
+        <div className=" flex items-center gap-8">
           {/*--------------- dropdown-----------------  */}
-          <div>
-            <Select>
+          <div >
+
+            <h2  className=' font-bold text-xl'>Created Task</h2>
+            {/* <Select>
               <SelectTrigger className="w-[180px] hover:cursor-pointer">
                 <SelectValue
                   placeholder="Select Task"
@@ -38,7 +40,7 @@ const DashboardBar = () => {
                   <SelectItem value="banana">Banana</SelectItem>
                 </SelectGroup>
               </SelectContent>
-            </Select>
+            </Select> */}
           </div>
 
           {/* -------------- Add task btn ------------------  */}

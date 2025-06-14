@@ -22,13 +22,13 @@ const Popup: React.FC<PopupProps> = ({ openModal, content }) => {
     <AnimatePresence>
       {openModal && (
         <motion.div
-          className="fixed inset-0 bg-white/80 bg-opacity-50 flex justify-center items-center z-50 "
+          className="fixed inset-0 bg-white/80 bg-opacity-50 flex justify-center items-center z-50 overflow-y-scroll "
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="bg-white p-4  w-[90%] lg:w-[50%] rounded-lg "
+            className="bg-white p-4  w-[90%] lg:w-[50%] rounded-lg overflow-y-scroll "
             variants={popupVariants}
             initial="hidden"
             animate="visible"

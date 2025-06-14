@@ -1,3 +1,7 @@
+"use client"
+
+
+
 import {
   dashboardUsersTableData,
   dashboardUsersTableDataProps,
@@ -6,7 +10,7 @@ import React from "react";
 import TableComponent from "../../TableComponent";
 import { TableCell, TableRow } from "../../ui/table";
 import Image from "next/image";
-import { Button } from "../../ui/button";
+import { useRouter } from "next/navigation";
 
 interface columnsProps {
   header: string;
@@ -15,6 +19,11 @@ interface columnsProps {
 }
 
 const columns: columnsProps[] = [
+  {
+    header:"",
+    accessor: "image",
+    classes: "hidden md:table-cell text-center",
+  },
   {
     header: "Name",
     accessor: "name",
@@ -47,16 +56,22 @@ const columns: columnsProps[] = [
   },
 ];
 
+
 const DashboardUsers = () => {
+
+  const router  = useRouter()
+
   const renderRow = (item: dashboardUsersTableDataProps) => (
     <TableRow
+    onClick={() =>router.push(`/admin/dashboard/${item.id}`)}
       key={item.id}
-      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
+      className="border-b hover:cursor-pointer hover:bg-gray-100 border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight font-Inter"
     >
-      <TableCell className="flex items-center gap-4  ">
-        <div className="flex flex-col">
-          <h3 className="font-semibold">{item.name}</h3>
-        </div>
+      <TableCell>
+        <div className="w-3 h-3 rounded-full bg-red-500 "></div>
+      </TableCell>
+      <TableCell >
+          <h3 className="font-semibold font-Inter">{item.name}</h3>
       </TableCell>
       <TableCell className="hidden md:table-cell  ">
        <div className=" flex justify-center">
@@ -71,12 +86,12 @@ const DashboardUsers = () => {
       </TableCell>
       <TableCell className="hidden md:table-cell ">
         <div className=" flex gap-2 items-center justify-center">
-            <Button className=" bg-transparent !border-lightRedText border hover:bg-lightRedText hover:text-white hover:cursor-pointer text-lightRedText">
-                Start
-            </Button>
-             <Button className=" bg-transparent !border-lightRedText border hover:bg-lightRedText hover:text-white hover:cursor-pointer text-lightRedText">
-                Finish
-            </Button>
+             <button className=" bg-transparent border border-[#513600FF] hover:bg-green-500 hover:text-white hover:cursor-pointer font-medium  text-[#513600FF] text-xs rounded p-1">
+            Start
+          </button>
+             <button className=" bg-transparent border border-[#513600FF] hover:bg-red-500 hover:text-white hover:cursor-pointer font-medium  text-[#513600FF] text-xs rounded p-1">
+            Finish
+          </button>
         </div>
       </TableCell>
       <TableCell className="hidden md:table-cell">
@@ -95,7 +110,7 @@ const DashboardUsers = () => {
           {item.tags.map((tag, i) => {
             return (
               <span
-                className=" odd:bg-[#f7e9ee] odd:text-[#E8618CFF] p-1 even:text-[#636AE8FF] even:bg-[#F2F2FDFF]"
+                className=" odd:bg-[#f7e9ee] rounded odd:text-[#E8618CFF] p-1 even:text-[#636AE8FF] even:bg-[#F2F2FDFF]"
                 key={i}
               >
                 {tag}
