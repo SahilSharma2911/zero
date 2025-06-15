@@ -1,7 +1,5 @@
 "use client"
 
-import { menuItems } from "@/assets/Data";
-import { IoSettingsOutline } from "react-icons/io5"
 import Link from "next/link";
 import React from "react";
 import { usePathname } from "next/navigation";
@@ -28,7 +26,11 @@ const Menu = () => {
 
   const path = usePathname()
 
-  const role = cookieData?.role as string
+  const role = cookieData?.role.toLowerCase() as string
+
+  console.log("role os is ",role)
+
+
 
 
 
@@ -41,17 +43,17 @@ const Menu = () => {
   {
     icon: <MdOutlineInsertChart />,
     label: "Tasks",
-    path: ``,
+    path: `/${role}/tasks`,
   },
   {
     icon: <LuUserRound />,
     label: "Users",
-    path: "/admin/users",
+    path: `/${role}/users`,
   },
   {
     icon: <MdOutlineBookmarks />,
     label: "Tags",
-    path: "/admin/tags",
+    path: `/${role}/tags`,
   },
 ];
 

@@ -1,16 +1,13 @@
 "use client"
 
-
-
-import {
-  dashboardUsersTableData,
-  dashboardUsersTableDataProps,
-} from "@/assets/Data";
 import React from "react";
 import TableComponent from "../../TableComponent";
 import { TableCell, TableRow } from "../../ui/table";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import useGetTasks from "@/components/hooks/useGetTasks";
+import { TaskProps } from "@/types/type";
+import assginBy from './../../../../public/images/assignlogo.png'
 
 interface columnsProps {
   header: string;
@@ -61,7 +58,11 @@ const DashboardUsers = () => {
 
   const router  = useRouter()
 
-  const renderRow = (item: dashboardUsersTableDataProps) => (
+  const {allTasks} = useGetTasks()
+
+  console.log("allTasks is here",allTasks)
+
+  const renderRow = (item: TaskProps) => (
     <TableRow
     onClick={() =>router.push(`/admin/dashboard/${item.id}`)}
       key={item.id}
@@ -71,12 +72,12 @@ const DashboardUsers = () => {
         <div className="w-3 h-3 rounded-full bg-red-500 "></div>
       </TableCell>
       <TableCell >
-          <h3 className="font-semibold font-Inter">{item.name}</h3>
+          <h3 className="font-semibold font-Inter">{item.title}</h3>
       </TableCell>
       <TableCell className="hidden md:table-cell  ">
        <div className=" flex justify-center">
          <Image
-          src={item.assignBy}
+          src={assginBy}
           alt="img"
           width={50}
           height={50}
@@ -96,7 +97,7 @@ const DashboardUsers = () => {
       </TableCell>
       <TableCell className="hidden md:table-cell">
         <p className=" text-center text-lightRedText">
-            {item.time}
+            2 hour
         </p>
       </TableCell>
 
@@ -107,13 +108,13 @@ const DashboardUsers = () => {
       </TableCell>
       <TableCell>
         <div className=" flex gap-2 items-center justify-center">
-          {item.tags.map((tag, i) => {
+          {item.taskTags.map((tag, i) => {
             return (
               <span
                 className=" odd:bg-[#f7e9ee] rounded odd:text-[#E8618CFF] p-1 even:text-[#636AE8FF] even:bg-[#F2F2FDFF]"
                 key={i}
               >
-                {tag}
+                {tag.tag?.name}
               </span>
             );
           })}
@@ -124,12 +125,12 @@ const DashboardUsers = () => {
 
   return (
     <div className="bg-[#fafafbe9] p-1 rounded-md mt-10">
-      {dashboardUsersTableData.length <= 0 ? (
+      {allTasks.length <= 0 ? (
         <div className="text-center text-gray-500 h-64">No parents found.</div>
       ) : (
         <TableComponent
           columns={columns}
-          data={dashboardUsersTableData}
+          data={allTasks}
           renderRow={renderRow}
         />
       )}

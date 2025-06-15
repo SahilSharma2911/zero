@@ -32,16 +32,16 @@ const useLogin = () => {
         data
       );
 
-      const cookieData = response.data?.data;
+      const responseData = response.data?.data;
 
-      console.log("login data is here",cookieData)
+      console.log("login data is here",responseData)
 
       const cookieData = {
-        id: cookieData.id,
-        name: cookieData.name,
-        email: cookieData.email,
-        token: cookieData.token,
-        role: cookieData.role,
+        id: responseData.id,
+        name: responseData.name,
+        email: responseData.email,
+        token: responseData.token,
+        role: responseData.role,
       };
 
       Cookies.set("cookieData", JSON.stringify(cookieData), { expires: 7 });

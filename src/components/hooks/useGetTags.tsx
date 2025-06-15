@@ -1,15 +1,11 @@
 import { useAppContext } from "@/Context/AppContext";
+import { TagTypeProps } from "@/types/type";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-interface tagProps {
-  id: string;
-  name: string;
-  color: string;
-}
 
 const useGetTags = () => {
-  const [allTags, setAllTags] = useState<tagProps[]>([]);
+  const [allTags, setAllTags] = useState<TagTypeProps[]>([]);
 
   const { cookieData } = useAppContext();
 

@@ -21,28 +21,13 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { Input } from "@/components/ui/input";
 import useGetTags from "@/components/hooks/useGetTags";
-
-type TagType = {
-  id: string;
-  name: string;
-  color: string;
-};
-
-interface TaskFormValues {
-  title: string;
-  description: string;
-  dueDate?: Date;
-  tags: string[];
-  attachments: File[];
-}
+import { TagTypeProps, TaskFormValuesProps } from "@/types/type";
 
 const popupVariants = {
   hidden: { opacity: 0, scale: 0.8 },
   visible: { opacity: 1, scale: 1 },
   exit: { opacity: 0, scale: 0.8 },
 };
-
-
 
 const AddTaskForm = ({
   setOpen,
@@ -52,7 +37,9 @@ const AddTaskForm = ({
   const { cookieData } = useAppContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const{allTags} = useGetTags()
+  const { allTags } = useGetTags();
+
+  console.log("allTags is here",allTags)
 
   const {
     register,
@@ -60,7 +47,7 @@ const AddTaskForm = ({
     setValue,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<TaskFormValues>({
+  } = useForm<TaskFormValuesProps>({
     defaultValues: {
       title: "Example Task 1",
       description: "",
@@ -69,7 +56,7 @@ const AddTaskForm = ({
     },
   });
 
-  const onSubmit = async (data: TaskFormValues) => {
+  const onSubmit = async (data: TaskFormValuesProps) => {
     const toastId = toast.loading("Creating task...");
 
     try {
@@ -80,10 +67,13 @@ const AddTaskForm = ({
         adminId: cookieData.role === "admin" ? null : cookieData.id,
         userId: cookieData.role === "admin" ? cookieData.id : null,
         tagIds: data.tags,
-        attachments: ["https://cdn.example.com/doc1.pdf", "https://cdn.example.com/image1.png"],
+        attachments: [
+          "https://cdn.example.com/doc1.pdf",
+          "https://cdn.example.com/image1.png",
+        ],
       };
 
-      console.log("formDAta of task is ",formData)
+      console.log("formDAta of task is ", formData);
 
       // Submit to API
       const response = await axios.post(
@@ -116,7 +106,7 @@ const AddTaskForm = ({
     setValue("attachments", updatedAttachments);
   };
 
-  const handleTagSelect = (tag: TagType) => {
+  const handleTagSelect = (tag: TagTypeProps) => {
     const currentTags = watch("tags");
     if (currentTags.includes(tag.id)) {
       setValue(
@@ -150,7 +140,6 @@ const AddTaskForm = ({
             height={50}
             className="w-14 h-14 rounded-full"
           />
-         
         </div>
         <Button
           onClick={() => setOpen(false)}
@@ -172,7 +161,6 @@ const AddTaskForm = ({
           <Input
             {...register("title", { required: "Title is required" })}
             placeholder="title"
-            
           />
           {errors.title && (
             <span className="text-red-500 text-sm">{errors.title.message}</span>
@@ -236,9 +224,7 @@ const AddTaskForm = ({
             </PopoverContent>
           </Popover>
           {errors.tags && (
-            <span className="text-red-500 text-sm">
-              {errors.tags.message}
-            </span>
+            <span className="text-red-500 text-sm">{errors.tags.message}</span>
           )}
         </div>
 
