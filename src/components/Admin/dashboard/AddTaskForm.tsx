@@ -49,7 +49,7 @@ const AddTaskForm = ({
 }: {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const { adminData } = useAppContext();
+  const { cookieData } = useAppContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const{allTags} = useGetTags()
@@ -77,8 +77,8 @@ const AddTaskForm = ({
         title: data.title,
         description: data.description,
         dueDate: data.dueDate,
-        adminId: adminData.role === "admin" ? null : adminData.id,
-        userId: adminData.role === "admin" ? adminData.id : null,
+        adminId: cookieData.role === "admin" ? null : cookieData.id,
+        userId: cookieData.role === "admin" ? cookieData.id : null,
         tagIds: data.tags,
         attachments: ["https://cdn.example.com/doc1.pdf", "https://cdn.example.com/image1.png"],
       };

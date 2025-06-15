@@ -27,7 +27,7 @@ const AddTagForm = ({
   const [showPicker, setShowPicker] = useState(false);
   const [selectedColor, setSelectedColor] = useState("#E89623");
 
-  const { adminData } = useAppContext();
+  const { cookieData } = useAppContext();
 
   const {
     register,
@@ -50,7 +50,7 @@ const AddTagForm = ({
         {
           name: data.name,
           color: data.color,
-          createdBy: adminData?.id,
+          createdBy: cookieData?.id,
         }
       );
 

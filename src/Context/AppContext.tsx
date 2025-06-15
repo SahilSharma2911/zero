@@ -5,45 +5,45 @@ import { createContext, ReactNode, useContext, useEffect, useState } from "react
 import Cookies from "js-cookie";
 
 interface AppContextType {
-  adminData: any; // Replace 'any' with your specific type
-  setAdminData: (data: any) => void;
+  cookieData: any; // Replace 'any' with your specific type
+  setCookieData: (data: any) => void;
   open: boolean;
   setOpen: (data: boolean) => void;
 }
 
 export const AppContext = createContext<AppContextType>({
-  adminData: null,
-  setAdminData: () => {},
+  cookieData: null,
+  setCookieData: () => {},
   open: false,
   setOpen: () => {},
 });
 
 export const AppContextProvider = ({ children }: { children: ReactNode }) => {
-  const [adminData, setAdminData] = useState();
+  const [cookieData, setCookieData] = useState();
     const [open, setOpen] = useState<boolean>(false);
 
-    console.log("login user data is here",adminData)
+    console.log("login user data is here",cookieData)
   
 
 // Initialize from cookies on mount
   useEffect(() => {
-    const loadAdminData = () => {
-      const adminCookie = Cookies.get("adminData");
+    const loadCookieData = () => {
+      const adminCookie = Cookies.get("cookieData");
       if (adminCookie) {
         try {
           const parsedData = JSON.parse(adminCookie);
-          setAdminData(parsedData);
+          setCookieData(parsedData);
         } catch (error) {
           console.error("Error parsing admin data", error);
         }
       }
     };
-    loadAdminData();
+    loadCookieData();
   }, []);
   
 
   return (
-    <AppContext.Provider value={{ adminData, setAdminData,open,setOpen }}>
+    <AppContext.Provider value={{ cookieData, setCookieData,open,setOpen }}>
       {children}
     </AppContext.Provider>
   );

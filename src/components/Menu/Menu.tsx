@@ -5,10 +5,56 @@ import { IoSettingsOutline } from "react-icons/io5"
 import Link from "next/link";
 import React from "react";
 import { usePathname } from "next/navigation";
+import { MdOutlineDashboard } from "react-icons/md";
+import { LuUserRound } from "react-icons/lu";
+import { JSX } from "react";
+
+import { MdOutlineBookmarks } from "react-icons/md";
+import { MdOutlineInsertChart } from "react-icons/md";
+import { useAppContext } from "@/Context/AppContext";
+
+interface MenuItem {
+  icon: JSX.Element;
+  label: string;
+  path: string;
+}
+
+ 
+
 
 const Menu = () => {
 
+  const{cookieData} = useAppContext()
+
   const path = usePathname()
+
+  const role = cookieData?.role as string
+
+
+
+  const menuItems: MenuItem[] = [
+  {
+    icon: <MdOutlineDashboard />,
+    label: "Dashboard",
+    path: `/${role}/dashboard`,
+  },
+  {
+    icon: <MdOutlineInsertChart />,
+    label: "Tasks",
+    path: ``,
+  },
+  {
+    icon: <LuUserRound />,
+    label: "Users",
+    path: "/admin/users",
+  },
+  {
+    icon: <MdOutlineBookmarks />,
+    label: "Tags",
+    path: "/admin/tags",
+  },
+];
+
 
   return (
     <div className=" mt-20 space-y-2 ">
@@ -18,11 +64,6 @@ const Menu = () => {
           <span className=" text-[0.9rem] hidden lg:block">{item.label}</span>
         </Link>
       ))}
-      <hr className=" mt-6 " />
-      <Link href={"/settings"} className="flex items-center gap-2 px-4 mt-6  ">
-          <span className=" text-2xl"><IoSettingsOutline/></span>
-          <span className=" text-[0.9rem] hidden lg:block">Settings</span>
-        </Link>
     </div>
   );
 };

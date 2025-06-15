@@ -15,7 +15,7 @@ interface FormValues {
 
 const useAddUser = () => {
 
-  const { adminData,open,setOpen } = useAppContext();
+  const { cookieData,open,setOpen } = useAppContext();
 
   const router = useRouter();
 
@@ -39,7 +39,7 @@ const useAddUser = () => {
       email: data?.email,
       password: data?.password,
       priority: parseInt(data?.priority),
-      companyAdminId: adminData?.id,
+      companyAdminId: cookieData?.id,
     };
 
     console.log("actualdaa ", actualData);

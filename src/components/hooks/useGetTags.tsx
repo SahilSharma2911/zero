@@ -11,14 +11,14 @@ interface tagProps {
 const useGetTags = () => {
   const [allTags, setAllTags] = useState<tagProps[]>([]);
 
-  const { adminData } = useAppContext();
+  const { cookieData } = useAppContext();
 
   
   useEffect(() => {
     const fetchTags = async () => {
     try {
       const response = await axios.get(
-        `https://task-management-backend-kohl-omega.vercel.app/api/tags/get-tags/${adminData.id}`
+        `https://task-management-backend-kohl-omega.vercel.app/api/tags/get-tags/${cookieData.id}`
       );
 
       if (response.status === 200) {
@@ -30,7 +30,7 @@ const useGetTags = () => {
   };
 
     fetchTags();
-  }, [adminData.id]);
+  }, [cookieData.id]);
 
   console.log("allTags is here",allTags)
 

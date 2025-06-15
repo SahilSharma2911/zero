@@ -32,20 +32,20 @@ const useLogin = () => {
         data
       );
 
-      const adminData = response.data?.data;
+      const cookieData = response.data?.data;
 
-      console.log("login data is here",adminData)
+      console.log("login data is here",cookieData)
 
       const cookieData = {
-        id: adminData.id,
-        name: adminData.name,
-        email: adminData.email,
-        token: adminData.token,
-        role: adminData.role,
+        id: cookieData.id,
+        name: cookieData.name,
+        email: cookieData.email,
+        token: cookieData.token,
+        role: cookieData.role,
       };
 
-      Cookies.set("adminData", JSON.stringify(cookieData), { expires: 7 });
-      Cookies.set("token", adminData.token, { expires: 7 });
+      Cookies.set("cookieData", JSON.stringify(cookieData), { expires: 7 });
+      Cookies.set("token", cookieData.token, { expires: 7 });
       router.push("/admin/dashboard");
       toast.success("Login successful!", { id: toastId });
 
