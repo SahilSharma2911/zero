@@ -1,3 +1,4 @@
+"use client"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -7,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox"; // Fixed import
+import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Search, UserPlus, X } from "lucide-react";
 import useFormData from "../hooks/useFormData";
 import {
@@ -16,6 +17,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import AddSubTaskModal from "./AddSubTaskModal";
 
 const popupVariants = {
   hidden: { opacity: 0, scale: 0.8 },
@@ -23,20 +26,44 @@ const popupVariants = {
   exit: { opacity: 0, scale: 0.8 },
 };
 
-const SubTasks = () => {
+interface SubTasksProps {
+  taskId: string;
+}
+
+const SubTasks: React.FC<SubTasksProps> = ({ taskId }) => {
   //--------------custom hook----------------
   const { subTasksData } = useFormData();
 
-  const subTasks = subTasksData?.subTasks;
+  const [localTasks, setLocalTasks] = useState(subTasksData?.subTasks || []);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Update local state when hook data changes
+  useEffect(() => {
+    if (subTasksData?.subTasks) {
+      setLocalTasks(subTasksData.subTasks);
+    }
+  }, [subTasksData?.subTasks]);
+
+  const subTasks = localTasks;
   const removeSubTask = subTasksData?.removeSubTask;
   const addSubTask = subTasksData?.addSubTask;
-  // const allFeedbacks = subTasksData?.availableFeedback;
   const selectedFeedback = subTasksData?.selectedFeedback;
-  // const handleFeedbackChange = subTasksData?.handleFeedbackChange;
   const setAssignTo = subTasksData?.setAssignTo;
   const setTaskName = subTasksData?.setTaskName;
   const toggleSubTaskCompletion = subTasksData?.toggleSubTaskCompletion;
 
+  const handleAddSubTask = async (subtaskData: {
+    taskId: string;
+    title: string;
+    userId: string;
+    expectedTime: number;
+    requiresFeedback: boolean;
+  }) => {
+    console.log('Adding subtask:', subtaskData);
+    if (addSubTask) {
+      addSubTask(subtaskData);
+    }
+  };
   return (
     <div className="mt-6 py-1">
       <h2 className="text-lg font-medium mb-2">Subtasks</h2>
@@ -51,14 +78,31 @@ const SubTasks = () => {
             <TableCell className="text-text">Action</TableCell>
           </TableRow>
         </TableHeader>
-        
+
         <TableBody>
           {subTasks?.map((task) => (
-            <TableRow key={task.id} >
+            <TableRow key={task.id}>
               <TableCell className="flex-1">
                 <Input
-                  value={task.name}
-                  onChange={(e) => setTaskName && setTaskName(e.target.value)}
+                  value={task.name || ""}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    console.log('Input change:', newValue, 'Task ID:', task.id);
+
+                    // Update local state immediately for responsiveness
+                    setLocalTasks(prev => prev.map(t =>
+                      t.id === task.id ? { ...t, name: newValue } : t
+                    ));
+
+                    // Call the hook function with just the new value
+                    if (setTaskName) {
+                      try {
+                        setTaskName(newValue);
+                      } catch (error) {
+                        console.log('Error calling setTaskName:', error);
+                      }
+                    }
+                  }}
                   className="p-2 w-[150px] placeholder:text-text"
                   placeholder="Task Name"
                 />
@@ -86,18 +130,18 @@ const SubTasks = () => {
                       className="flex gap-2 flex-col w-full"
                     >
                       <div className="relative">
-                        <Search className="absolute top-1/2 -translate-y-1/2 left-2 text-text" />
+                        <Search className="absolute top-1/2 -translate-y-1/2 left-2 text-text" size={16} />
                         <input
                           placeholder="Search by email"
                           type="email"
                           onChange={(e) => setAssignTo && setAssignTo(e.target.value)}
-                          className="!border rounded-md p-2 pl-10 w-full"
+                          className="border rounded-md p-2 pl-10 w-full"
                         />
                       </div>
                       <div>
                         <div className="hover:bg-gray-100 p-2 rounded-md hover:cursor-pointer flex items-center gap-2 text-text">
                           <span>
-                            <UserPlus />
+                            <UserPlus size={16} />
                           </span>
                           Invite people via email
                         </div>
@@ -110,7 +154,7 @@ const SubTasks = () => {
               {/*---------------------- checkbox -------------------- */}
               <TableCell className="flex-1">
                 <div className="flex items-center gap-2">
-                  <Checkbox 
+                  <Checkbox
                     checked={task.completed || false}
                     onCheckedChange={() => toggleSubTaskCompletion && toggleSubTaskCompletion(task.id)}
                     className="h-5 w-5 rounded border-gray-300"
@@ -126,7 +170,7 @@ const SubTasks = () => {
 
               <TableCell className="flex-1">
                 <div className="flex items-center gap-1 text-text">
-                  <select name="hour" id="hour" className="appearance-none border rounded p-1">
+                  <select name="hour" id={`hour-${task.id}`} className="appearance-none border rounded p-1">
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
@@ -134,16 +178,16 @@ const SubTasks = () => {
                     <option value="5">5</option>
                     <option value="6">6</option>
                   </select>
-                  Hour
+                  <span className="text-sm">Hour</span>
                 </div>
               </TableCell>
-              
+
               <TableCell className="flex-1">
                 <button className="bg-red-400 hover:bg-red-500 text-white rounded hover:cursor-pointer px-3 py-1 text-sm">
                   {task.completed ? "Completed" : "Start"}
                 </button>
               </TableCell>
-              
+
               <TableCell className="flex-1">
                 <Button
                   variant="ghost"
@@ -158,16 +202,12 @@ const SubTasks = () => {
         </TableBody>
       </Table>
 
-      {subTasks && (
-        <Button
-          variant="outline"
-          className="mt-2 flex items-center gap-2"
-          onClick={addSubTask}
-        >
-          <Plus size={16} />
-          Add Subtask
-        </Button>
-      )}
+      <AddSubTaskModal
+        isOpen={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onAddSubTask={handleAddSubTask}
+        taskId={taskId}
+      />
     </div>
   );
 };

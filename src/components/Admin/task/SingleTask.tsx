@@ -1,9 +1,11 @@
 "use client"
-import React, { useState, useEffect } from 'react'
+import React from 'react'
+import { useQuery } from '@tanstack/react-query'
 import assignTo from '../../../../public/images/assignlogo.png'
 import Image from 'next/image'
 import { CalendarIcon } from 'lucide-react';
 import SubTasks from '../dashboard/Form/SubTasks';
+import CommentsBox from '@/components/CommentsBox';
 
 interface User {
   id: string;
@@ -65,38 +67,35 @@ interface SingleTaskProps {
   taskId: string;
 }
 
+// API function to fetch task data
+const fetchTask = async (taskId: string): Promise<Task> => {
+  const response = await fetch(
+    `https://task-management-backend-kohl-omega.vercel.app/api/tasks/get-task/${taskId}`
+  );
+
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status}`);
+  }
+
+  const result = await response.json();
+  return result.data;
+};
+
 const SingleTask: React.FC<SingleTaskProps> = ({ taskId }) => {
-  const [data, setData] = useState<Task | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data,
+    isLoading,
+    error,
+    isError
+  } = useQuery({
+    queryKey: ['task', taskId],
+    queryFn: () => fetchTask(taskId),
+    enabled: !!taskId, // Only run query if taskId exists
+    staleTime: 5 * 60 * 1000, // Data is fresh for 5 minutes
+    retry: 3, // Retry failed requests 3 times
+  });
 
-  useEffect(() => {
-    const fetchTask = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(
-          `https://task-management-backend-kohl-omega.vercel.app/api/tasks/get-task/${taskId}`
-        );
-
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
-
-        const result = await response.json();
-        setData(result.data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (taskId) {
-      fetchTask();
-    }
-  }, [taskId]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center w-full h-screen">
         <div className="text-lg">Loading...</div>
@@ -104,10 +103,12 @@ const SingleTask: React.FC<SingleTaskProps> = ({ taskId }) => {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <div className="flex items-center justify-center w-full h-screen">
-        <div className="text-red-500">Error: {error}</div>
+        <div className="text-red-500">
+          Error: {error instanceof Error ? error.message : 'An error occurred'}
+        </div>
       </div>
     );
   }
@@ -154,10 +155,13 @@ const SingleTask: React.FC<SingleTaskProps> = ({ taskId }) => {
         </div>
 
         {/* date */}
-        <div className='text-[#6F6F6FFF] flex items-center gap-2 mt-3'> <CalendarIcon size={16} />{new Date(data.createdAt).toLocaleDateString()}</div>
+        <div className='text-[#6F6F6FFF] flex items-center gap-2 mt-3'>
+          <CalendarIcon size={16} />
+          {new Date(data.createdAt).toLocaleDateString()}
+        </div>
 
         {/* sub task */}
-        <SubTasks />
+        <SubTasks taskId={taskId} />
 
         {/*------------- description ----------- */}
         <div className="my-4">
@@ -214,24 +218,7 @@ const SingleTask: React.FC<SingleTaskProps> = ({ taskId }) => {
 
       {/* right side section of Comments */}
       <div className="w-1/2 pl-4 border-l">
-        <h3 className="text-lg font-medium mb-4">Comments</h3>
-        {data.comments && data.comments.length > 0 ? (
-          <div className="space-y-4">
-            {data.comments.map((comment) => (
-              <div key={comment.id} className="bg-gray-50 p-3 rounded">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="font-medium">{comment.author?.name}</span>
-                  <span className="text-sm text-gray-500">
-                    {comment.createdAt && new Date(comment.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <p>{comment.content}</p>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-500">No comments yet</p>
-        )}
+        <CommentsBox />
       </div>
     </div>
   );

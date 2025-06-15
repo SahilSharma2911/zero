@@ -3,6 +3,7 @@ import "./globals.css";
 import { Inter, Righteous } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import { AppContextProvider } from "@/Context/AppContext";
+import Providers from "@/providers/providers";
 
 // Initialize the font
 const righteous = Righteous({
@@ -32,8 +33,10 @@ export default function RootLayout({
     <html lang="en" className={`${righteous.variable} ${inter.variable} `}>
       <body className="font-sans">
         <AppContextProvider>
-          <Toaster />
-          {children}
+          <Providers>
+            <Toaster />
+            {children}
+          </Providers>
         </AppContextProvider>
       </body>
     </html>
