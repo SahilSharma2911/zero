@@ -9,205 +9,266 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Search, UserPlus, X } from "lucide-react";
-import useFormData from "../hooks/useFormData";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { Plus, X, Edit } from "lucide-react";
+import { useState } from "react";
 import AddSubTaskModal from "./AddSubTaskModal";
+import UpdateStatusModal from "./UpdateStatusModal";
+import { useQuery } from "@tanstack/react-query";
 
-const popupVariants = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: { opacity: 1, scale: 1 },
-  exit: { opacity: 0, scale: 0.8 },
-};
+interface SubTask {
+  id: string;
+  taskId: string;
+  title: string;
+  userId: string;
+  adminId: string | null;
+  expectedTime: number;
+  requiresFeedback: boolean;
+  completedAt: string | null;
+  status: string;
+  feedback: string | null;
+  createdAt: string;
+  updatedAt: string;
+  assignedToUser: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  assignedToAdmin: null;
+}
 
 interface SubTasksProps {
   taskId: string;
 }
 
+const fetchSubTasks = async (taskId: string): Promise<SubTask[]> => {
+  const response = await fetch(
+    `https://task-management-backend-kohl-omega.vercel.app/api/tasks/get-task/${taskId}`
+  );
+  if (!response.ok) {
+    throw new Error('Failed to fetch subtasks');
+  }
+  const result = await response.json();
+  return result.data.subtasks || [];
+};
+
 const SubTasks: React.FC<SubTasksProps> = ({ taskId }) => {
-  //--------------custom hook----------------
-  const { subTasksData } = useFormData();
+  const { data: subTasks, isLoading, error, refetch } = useQuery({
+    queryKey: ['subtasks', taskId],
+    queryFn: () => fetchSubTasks(taskId),
+    enabled: !!taskId,
+  });
 
-  const [localTasks, setLocalTasks] = useState(subTasksData?.subTasks || []);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [selectedSubTaskForStatusUpdate, setSelectedSubTaskForStatusUpdate] = useState<SubTask | null>(null);
 
-  // Update local state when hook data changes
-  useEffect(() => {
-    if (subTasksData?.subTasks) {
-      setLocalTasks(subTasksData.subTasks);
-    }
-  }, [subTasksData?.subTasks]);
+  // Simple callback to refresh data after successful creation
+  const handleSubTaskCreated = () => {
+    refetch();
+    setIsModalOpen(false);
+  };
 
-  const subTasks = localTasks;
-  const removeSubTask = subTasksData?.removeSubTask;
-  const addSubTask = subTasksData?.addSubTask;
-  const selectedFeedback = subTasksData?.selectedFeedback;
-  const setAssignTo = subTasksData?.setAssignTo;
-  const setTaskName = subTasksData?.setTaskName;
-  const toggleSubTaskCompletion = subTasksData?.toggleSubTaskCompletion;
+  // Callback to refresh data after status update
+  const handleStatusUpdated = () => {
+    refetch();
+    setSelectedSubTaskForStatusUpdate(null);
+  };
 
-  const handleAddSubTask = async (subtaskData: {
-    taskId: string;
-    title: string;
-    userId: string;
-    expectedTime: number;
-    requiresFeedback: boolean;
-  }) => {
-    console.log('Adding subtask:', subtaskData);
-    if (addSubTask) {
-      addSubTask(subtaskData);
+  const handleDeleteSubTask = async (subtaskId: string) => {
+    try {
+      const response = await fetch(
+        `https://task-management-backend-kohl-omega.vercel.app/api/subtasks/delete-subtask/${subtaskId}`,
+        {
+          method: 'DELETE',
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to delete subtask');
+      }
+
+      await refetch();
+    } catch (error) {
+      console.error('Error deleting subtask:', error);
     }
   };
+
+  const handleToggleCompletion = async (subtaskId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'COMPLETED' ? 'PENDING' : 'COMPLETED';
+
+    try {
+      const response = await fetch(
+        `https://task-management-backend-kohl-omega.vercel.app/api/subtasks/update-subtask/${subtaskId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            status: newStatus,
+            completedAt: newStatus === 'COMPLETED' ? new Date().toISOString() : null,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to update subtask');
+      }
+
+      await refetch();
+    } catch (error) {
+      console.error('Error updating subtask:', error);
+    }
+  };
+
+  const handleOpenStatusModal = (subTask: SubTask) => {
+    setSelectedSubTaskForStatusUpdate(subTask);
+    setIsStatusModalOpen(true);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'COMPLETED':
+        return 'bg-green-400 hover:bg-green-500';
+      case 'IN_PROGRESS':
+        return 'bg-blue-400 hover:bg-blue-500';
+      case 'ON_HOLD':
+        return 'bg-yellow-400 hover:bg-yellow-500';
+      case 'CANCELLED':
+        return 'bg-red-400 hover:bg-red-500';
+      default:
+        return 'bg-gray-400 hover:bg-gray-500';
+    }
+  };
+
+  if (isLoading) {
+    return <div>Loading subtasks...</div>;
+  }
+
+  if (error) {
+    return <div>Error loading subtasks: {error.message}</div>;
+  }
+
   return (
     <div className="mt-6 py-1">
-      <h2 className="text-lg font-medium mb-2">Subtasks</h2>
-      <Table className="relative">
-        <TableHeader className="sticky top-0 bg-white z-10">
-          <TableRow>
-            <TableCell className="text-text">Name</TableCell>
-            <TableCell className="text-text">Assign to</TableCell>
-            <TableCell className="text-text">Feedback</TableCell>
-            <TableCell className="text-text">Time</TableCell>
-            <TableCell className="text-text">Status</TableCell>
-            <TableCell className="text-text">Action</TableCell>
-          </TableRow>
-        </TableHeader>
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-lg font-medium">Subtasks</h2>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-1"
+        >
+          <Plus size={16} />
+          Add Subtask
+        </Button>
+      </div>
 
-        <TableBody>
-          {subTasks?.map((task) => (
-            <TableRow key={task.id}>
-              <TableCell className="flex-1">
-                <Input
-                  value={task.name || ""}
-                  onChange={(e) => {
-                    const newValue = e.target.value;
-                    console.log('Input change:', newValue, 'Task ID:', task.id);
+      {subTasks && subTasks.length > 0 ? (
+        <Table className="relative">
+          <TableHeader className="sticky top-0 bg-white z-10">
+            <TableRow>
+              <TableCell className="text-text">Title</TableCell>
+              <TableCell className="text-text">Assigned To</TableCell>
+              <TableCell className="text-text">Feedback Required</TableCell>
+              <TableCell className="text-text">Time (hours)</TableCell>
+              <TableCell className="text-text">Status</TableCell>
+              <TableCell className="text-text">Action</TableCell>
+            </TableRow>
+          </TableHeader>
 
-                    // Update local state immediately for responsiveness
-                    setLocalTasks(prev => prev.map(t =>
-                      t.id === task.id ? { ...t, name: newValue } : t
-                    ));
+          <TableBody>
+            {subTasks.map((task) => (
+              <TableRow key={task.id}>
+                <TableCell className="flex-1">
+                  <Input
+                    value={task.title}
+                    readOnly
+                    className="p-2 w-[150px] placeholder:text-text"
+                  />
+                </TableCell>
 
-                    // Call the hook function with just the new value
-                    if (setTaskName) {
-                      try {
-                        setTaskName(newValue);
-                      } catch (error) {
-                        console.log('Error calling setTaskName:', error);
-                      }
-                    }
-                  }}
-                  className="p-2 w-[150px] placeholder:text-text"
-                  placeholder="Task Name"
-                />
-              </TableCell>
+                <TableCell className="flex-1">
+                  <div className="flex items-center gap-2">
+                    {task.assignedToUser ? (
+                      <>
+                        <span>{task.assignedToUser.name}</span>
+                        <span className="text-sm text-gray-500">({task.assignedToUser.email})</span>
+                      </>
+                    ) : (
+                      <span>Unassigned</span>
+                    )}
+                  </div>
+                </TableCell>
 
-              {/*----------------- assign to ----------------- */}
-              <TableCell className="flex-1">
-                <Popover>
-                  <PopoverTrigger asChild>
+                <TableCell className="flex-1">
+                  <Checkbox
+                    checked={task.requiresFeedback}
+                    disabled
+                    className="h-5 w-5 rounded border-gray-300"
+                  />
+                </TableCell>
+
+                <TableCell className="flex-1">
+                  <div className="flex items-center gap-1 text-text">
+                    <span>{task.expectedTime}</span>
+                    <span className="text-sm">hours</span>
+                  </div>
+                </TableCell>
+
+                <TableCell className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <button
+                      className={`${getStatusColor(task.status)} text-white rounded hover:cursor-pointer px-3 py-1 text-sm`}
+                      onClick={() => handleOpenStatusModal(task)}
+                    >
+                      {task.status}
+                    </button>
+                  </div>
+                </TableCell>
+
+                <TableCell className="flex-1">
+                  <div className="flex gap-2">
+                    <Checkbox
+                      checked={task.status === 'COMPLETED'}
+                      onCheckedChange={() => handleToggleCompletion(task.id, task.status)}
+                      className="h-5 w-5 rounded border-gray-300"
+                    />
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="hover:cursor-pointer"
+                      onClick={() => handleDeleteSubTask(task.id)}
                     >
-                      <UserPlus className="text-text" size={16} />
+                      <X size={16} />
                     </Button>
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <motion.div
-                      variants={popupVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                      transition={{ duration: 0.2 }}
-                      className="flex gap-2 flex-col w-full"
-                    >
-                      <div className="relative">
-                        <Search className="absolute top-1/2 -translate-y-1/2 left-2 text-text" size={16} />
-                        <input
-                          placeholder="Search by email"
-                          type="email"
-                          onChange={(e) => setAssignTo && setAssignTo(e.target.value)}
-                          className="border rounded-md p-2 pl-10 w-full"
-                        />
-                      </div>
-                      <div>
-                        <div className="hover:bg-gray-100 p-2 rounded-md hover:cursor-pointer flex items-center gap-2 text-text">
-                          <span>
-                            <UserPlus size={16} />
-                          </span>
-                          Invite people via email
-                        </div>
-                      </div>
-                    </motion.div>
-                  </PopoverContent>
-                </Popover>
-              </TableCell>
-
-              {/*---------------------- checkbox -------------------- */}
-              <TableCell className="flex-1">
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    checked={task.completed || false}
-                    onCheckedChange={() => toggleSubTaskCompletion && toggleSubTaskCompletion(task.id)}
-                    className="h-5 w-5 rounded border-gray-300"
-                  />
-                  {selectedFeedback?.length > 0 && (
-                    <div className="flex items-center gap-1">
-                      <div className={`border size-3 ${selectedFeedback[0].color}`}></div>
-                      <span className="text-sm">{selectedFeedback[0].name}</span>
-                    </div>
-                  )}
-                </div>
-              </TableCell>
-
-              <TableCell className="flex-1">
-                <div className="flex items-center gap-1 text-text">
-                  <select name="hour" id={`hour-${task.id}`} className="appearance-none border rounded p-1">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                  </select>
-                  <span className="text-sm">Hour</span>
-                </div>
-              </TableCell>
-
-              <TableCell className="flex-1">
-                <button className="bg-red-400 hover:bg-red-500 text-white rounded hover:cursor-pointer px-3 py-1 text-sm">
-                  {task.completed ? "Completed" : "Start"}
-                </button>
-              </TableCell>
-
-              <TableCell className="flex-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => removeSubTask && removeSubTask(task.id)}
-                >
-                  <X size={16} />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      ) : (
+        <div className="text-center py-4 text-gray-500">
+          No subtasks found. Add a subtask to get started.
+        </div>
+      )}
 
       <AddSubTaskModal
         isOpen={isModalOpen}
         onOpenChange={setIsModalOpen}
-        onAddSubTask={handleAddSubTask}
+        onSubTaskCreated={handleSubTaskCreated}
         taskId={taskId}
       />
+
+      {selectedSubTaskForStatusUpdate && (
+        <UpdateStatusModal
+          isOpen={isStatusModalOpen}
+          onOpenChange={setIsStatusModalOpen}
+          taskId={selectedSubTaskForStatusUpdate.id}
+          currentStatus={selectedSubTaskForStatusUpdate.status}
+          onStatusUpdated={handleStatusUpdated}
+        />
+      )}
     </div>
   );
 };

@@ -1,7 +1,6 @@
 "use client"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -9,33 +8,120 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { Plus } from "lucide-react";
+import { useAppContext } from "@/Context/AppContext";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface AddSubTaskModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddSubTask: (task: {
-    taskId: string;
-    title: string;
-    userId: string;
-    expectedTime: number;
-    requiresFeedback: boolean;
-  }) => void;
+  onSubTaskCreated: () => void; // Changed from onAddSubTask
   taskId: string;
 }
 
-const DEFAULT_USER_ID = "afc709e1-dbbb-4fa9-a862-3c0e27dcb5ba";
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
 
-const AddSubTaskModal = ({ isOpen, onOpenChange, onAddSubTask, taskId }: AddSubTaskModalProps) => {
-  const [taskData, setTaskData] = useState({
-    title: '',
-    expectedTime: 6, // Default to 6 hours
-    requiresFeedback: true, // Default to true
+interface CreateSubTaskPayload {
+  taskId: string;
+  title: string;
+  userId: string;
+  expectedTime: number;
+  requiresFeedback: boolean;
+}
+
+// API function for creating subtask
+const createSubTask = async (payload: CreateSubTaskPayload) => {
+  const response = await fetch('https://task-management-backend-kohl-omega.vercel.app/api/subtasks/create-subtask', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  if (!response.ok) {
+    throw new Error('Failed to create subtask');
+  }
+
+  return response.json();
+};
+
+const AddSubTaskModal = ({ isOpen, onOpenChange, onSubTaskCreated, taskId }: AddSubTaskModalProps) => {
+  const { cookieData } = useAppContext();
+  const queryClient = useQueryClient();
+
+  const [taskData, setTaskData] = useState({
+    title: '',
+    expectedTime: 6,
+    requiresFeedback: true,
+    userId: '',
+  });
+  const [users, setUsers] = useState<User[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // TanStack Query mutation for creating subtask
+  const createSubTaskMutation = useMutation({
+    mutationFn: createSubTask,
+    onSuccess: (data) => {
+      // Invalidate and refetch the specific task query
+      queryClient.invalidateQueries({
+        queryKey: ['subtasks', taskId]
+      });
+
+      // Call the callback function to notify parent
+      onSubTaskCreated();
+
+      // Reset form
+      setTaskData({
+        title: '',
+        expectedTime: 6,
+        requiresFeedback: true,
+        userId: '',
+      });
+
+      toast.success('Subtask created successfully!');
+    },
+    onError: (error) => {
+      console.error('Error creating subtask:', error);
+      toast.error('Failed to create subtask');
+    }
+  });
+
+  useEffect(() => {
+    if (isOpen && cookieData?.id) {
+      fetchUsers();
+    }
+  }, [isOpen, cookieData?.id]);
+
+  const fetchUsers = async () => {
+    try {
+      setLoadingUsers(true);
+      const response = await fetch(
+        `https://task-management-backend-kohl-omega.vercel.app/api/auth/company-users/${cookieData.id}?search=${searchTerm}`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+
+      const data = await response.json();
+      setUsers(data.data.users || []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast.error('Failed to load users');
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setTaskData(prev => ({
       ...prev,
@@ -59,54 +145,40 @@ const AddSubTaskModal = ({ isOpen, onOpenChange, onAddSubTask, taskId }: AddSubT
     }));
   };
 
+  const handleUserSelect = (userId: string) => {
+    setTaskData(prev => ({
+      ...prev,
+      userId
+    }));
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchUsers();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const payload = {
+
+    if (!taskData.userId) {
+      toast.error('Please select a user');
+      return;
+    }
+
+    const payload: CreateSubTaskPayload = {
       taskId,
       title: taskData.title,
-      userId: DEFAULT_USER_ID,
+      userId: taskData.userId,
       expectedTime: taskData.expectedTime,
       requiresFeedback: taskData.requiresFeedback
     };
 
-    try {
-      // Log the payload to console (for testing)
-      console.log('Submitting subtask:', payload);
-
-      // Call the API
-      const response = await fetch('https://task-management-backend-kohl-omega.vercel.app/api/subtasks/create-subtask', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create subtask');
-      }
-
-      const result = await response.json();
-      console.log('Subtask created:', result);
-
-      // Call the parent component's handler
-      onAddSubTask(payload);
-      
-      // Reset form and close modal
-      setTaskData({
-        title: '',
-        expectedTime: 6,
-        requiresFeedback: true,
-      });
-      onOpenChange(false);
-
-      // Show success message
-      toast.success('Subtask created successfully!');
-    } catch (error) {
-      console.error('Error creating subtask:', error);
-      toast.error('Failed to create subtask');
-    }
+    // Use the mutation - this is the ONLY API call now
+    createSubTaskMutation.mutate(payload);
   };
 
   return (
@@ -117,7 +189,7 @@ const AddSubTaskModal = ({ isOpen, onOpenChange, onAddSubTask, taskId }: AddSubT
           Add Subtask
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Add New Subtask</DialogTitle>
         </DialogHeader>
@@ -170,10 +242,44 @@ const AddSubTaskModal = ({ isOpen, onOpenChange, onAddSubTask, taskId }: AddSubT
             </label>
           </div>
 
-          <div className="bg-gray-100 p-3 rounded-md">
-            <p className="text-sm text-gray-600">
-              <strong>Assigned to:</strong> Default User (ID: {DEFAULT_USER_ID})
-            </p>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium mb-1">
+              Assign to User*
+            </label>
+
+            <form onSubmit={handleSearchSubmit} className="flex gap-2">
+              <Input
+                placeholder="Search users..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="flex-1"
+              />
+              <Button type="submit" size="sm">
+                Search
+              </Button>
+            </form>
+
+            {loadingUsers ? (
+              <div className="text-center py-4">Loading users...</div>
+            ) : users.length === 0 ? (
+              <div className="text-center py-4 text-sm text-gray-500">
+                No users found
+              </div>
+            ) : (
+              <div className="border rounded-md max-h-60 overflow-y-auto">
+                {users.map((user) => (
+                  <div
+                    key={user.id}
+                    onClick={() => handleUserSelect(user.id)}
+                    className={`p-3 cursor-pointer hover:bg-gray-100 ${taskData.userId === user.id ? 'bg-blue-50 border-l-2 border-blue-500' : ''
+                      }`}
+                  >
+                    <div className="font-medium">{user.name}</div>
+                    <div className="text-sm text-gray-500">{user.email}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-2">
@@ -184,7 +290,12 @@ const AddSubTaskModal = ({ isOpen, onOpenChange, onAddSubTask, taskId }: AddSubT
             >
               Cancel
             </Button>
-            <Button type="submit">Create Subtask</Button>
+            <Button
+              type="submit"
+              disabled={createSubTaskMutation.isPending}
+            >
+              {createSubTaskMutation.isPending ? 'Creating...' : 'Create Subtask'}
+            </Button>
           </div>
         </form>
       </DialogContent>

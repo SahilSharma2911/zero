@@ -124,7 +124,7 @@ const SingleTask: React.FC<SingleTaskProps> = ({ taskId }) => {
   return (
     <div className="flex p-4 w-full h-screen">
       {/* left side section */}
-      <div className="w-1/2 pr-4">
+      <div className="w-full pr-4">
         {/*------ image and title -------- */}
         <div className="flex gap-2 items-center mb-4">
           <div>
@@ -217,9 +217,9 @@ const SingleTask: React.FC<SingleTaskProps> = ({ taskId }) => {
       </div>
 
       {/* right side section of Comments */}
-      <div className="w-1/2 pl-4 border-l">
+      {/* <div className="w-1/2 pl-4 border-l">
         <CommentsBox />
-      </div>
+      </div> */}
     </div>
   );
 };
