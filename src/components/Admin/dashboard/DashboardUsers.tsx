@@ -84,7 +84,7 @@ const DashboardUsers = () => {
     }
   };
 
-  const handleTaskAction = (e: React.MouseEvent, taskId: string, currentStatus: string) => {
+  const handleTaskAction = (e: React.MouseEvent<HTMLButtonElement>, taskId: string, currentStatus: string) => {
     e.stopPropagation();
 
     switch(currentStatus){
@@ -143,7 +143,7 @@ const DashboardUsers = () => {
           )}
           {item.status === "IN_PROGRESS" && (
             <button
-              onClick={(e) => handleTaskAction(e, item.id)}
+              onClick={(e) => handleTaskAction(e, item.id, item.status)}
               className="bg-transparent border border-[#513600FF] hover:bg-blue-500 hover:text-white hover:cursor-pointer font-medium text-[#513600FF] text-xs rounded p-1 px-2 transition-colors"
             >
               Complete
