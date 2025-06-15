@@ -1,60 +1,82 @@
 import { useAppContext } from "@/Context/AppContext";
 import { TaskProps } from "@/types/type";
-import axios from "axios";
+import axios, { CancelTokenSource } from "axios";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const useGetTasks = () => {
-  const [allTasks, setAllTasks] = useState<TaskProps[]>([]); // Initialize with proper type
+  const [allTasks, setAllTasks] = useState<TaskProps[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const { cookieData } = useAppContext();
 
-
   useEffect(() => {
+    let cancelTokenSource: CancelTokenSource | null = null;
+
     const fetchTasks = async () => {
-      // Check if we have the required data
+      // Validate required data
       if (!cookieData?.id || !cookieData?.role) {
         setLoading(false);
         return;
       }
 
-      const loadingId = toast.loading("Fetching tasks...")
+      // Create cancellation token
+      cancelTokenSource = axios.CancelToken.source();
+      const loadingId = toast.loading("Fetching tasks...");
 
       try {
         setLoading(true);
+        setError(null);
+
         const roleParam = cookieData.role === "Admin" ? "adminId" : "userId";
         const response = await axios.get(
-          `https://task-management-backend-kohl-omega.vercel.app/api/tasks/get-tasks?${roleParam}=${cookieData.id}`
+          `https://task-management-backend-kohl-omega.vercel.app/api/tasks/get-tasks`,
+          {
+            params: {
+              [roleParam]: cookieData.id
+            },
+            cancelToken: cancelTokenSource.token,
+            timeout: 10000 // 10 second timeout
+          }
         );
 
-        console.log("response is here",response)
+        // Validate response structure
+        if (!response.data || !Array.isArray(response.data.data)) {
+          throw new Error("Invalid response structure");
+        }
 
-        // Adjust based on your actual API response structure
-        const tasks = response.data.data || response.data || [];
-        setAllTasks(tasks);
-        toast.success("Tasks Fetched",{id:loadingId})
+        setAllTasks(response.data.data);
+        toast.success("Tasks loaded successfully", { id: loadingId });
       } catch (err) {
-        console.error("Error fetching tasks:", err);
-        setError("Failed to fetch tasks");
-        toast.error("Failed to fetch tasks",{id:loadingId})
+        if (axios.isCancel(err)) {
+          console.log("Request canceled:", err.message);
+        } else {
+          console.error("Error fetching tasks:", err);
+          const errorMessage = (err instanceof Error && err.message) ? err.message : "Failed to fetch tasks";
+          setError(errorMessage);
+          toast.error("Failed to fetch tasks. Please try again.", { id: loadingId });
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchTasks();
-  }, [cookieData]); 
-  
-  // Only depend on cookieData
 
+    // Cleanup function to cancel request if component unmounts
+    return () => {
+      if (cancelTokenSource) {
+        cancelTokenSource.cancel("Component unmounted, request canceled");
+      }
+    };
+  }, [cookieData?.id, cookieData?.role]); // Only re-run if these values change
 
-
+  // Memoize the returned object to prevent unnecessary re-renders
   return {
     allTasks,
     loading,
-    error
+    error,
+    isEmpty: allTasks.length === 0 && !loading
   };
 };
 
