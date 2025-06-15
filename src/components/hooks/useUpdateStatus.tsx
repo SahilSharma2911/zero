@@ -4,7 +4,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-const useGetTasks = () => {
+const useUpdateStatus = () => {
   const [allTasks, setAllTasks] = useState<TaskProps[]>([]); // Initialize with proper type
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -12,8 +12,8 @@ const useGetTasks = () => {
   const { cookieData } = useAppContext();
 
 
-  useEffect(() => {
-    const fetchTasks = async () => {
+    const updateStatus = async (e: React.MouseEvent<HTMLButtonElement> ,taskId:string,status:string) => {
+        e.stopPropagation()
       // Check if we have the required data
       if (!cookieData?.id || !cookieData?.role) {
         setLoading(false);
@@ -26,7 +26,7 @@ const useGetTasks = () => {
         setLoading(true);
         const roleParam = cookieData.role === "Admin" ? "adminId" : "userId";
         const response = await axios.get(
-          `https://task-management-backend-kohl-omega.vercel.app/api/tasks/get-tasks?${roleParam}=${cookieData.id}`
+          `https://task-management-backend-kohl-omega.vercel.app/update-task/${taskId}`
         );
 
         console.log("response is here",response)
@@ -44,18 +44,12 @@ const useGetTasks = () => {
       }
     };
 
-    fetchTasks();
-  }, [cookieData]); 
-  
-  // Only depend on cookieData
 
 
 
   return {
-    allTasks,
-    loading,
-    error
+    updateStatus
   };
 };
 
-export default useGetTasks;
+export default useUpdateStatus;
