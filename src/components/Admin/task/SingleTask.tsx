@@ -1,4 +1,4 @@
-import { TaskProps } from '@/types/type'
+// import { TaskProps } from '@/types/type'
 import React from 'react'
 import assignTo from '../../../../public/images/assignlogo.png'
 import Image from 'next/image'
