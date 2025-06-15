@@ -10,7 +10,10 @@ type paramsProps = {
 const page = async ({ params }: paramsProps) => {
   const { taskId } = await params;
 
-  console.log(taskId, "taskId is here");
+
+  return (
+    <>
+      <SingleTask taskId={taskId} />
 
   const fetchTaskById = async (Id: string) => {
     try {
@@ -26,11 +29,9 @@ const page = async ({ params }: paramsProps) => {
 
   const data = fetchTaskById(taskId as string);
 
-  console.log("data is here of single TAsk ", data);
 
   return (
     <>
-      {/* <SingleTask data={data} /> */}
       <CommentsWrapper taskId={taskId} />
     </>
   );
