@@ -72,6 +72,7 @@ const SubTasks: React.FC<SubTasksProps> = ({ taskId }) => {
   const handleStatusUpdated = () => {
     refetch();
     setSelectedSubTaskForStatusUpdate(null);
+    setIsStatusModalOpen(false);
   };
 
   const handleDeleteSubTask = async (subtaskId: string) => {
@@ -93,20 +94,22 @@ const SubTasks: React.FC<SubTasksProps> = ({ taskId }) => {
     }
   };
 
-  const handleToggleCompletion = async (subtaskId: string, currentStatus: string) => {
+  const handleToggleCompletion = async (subtaskId: string, currentStatus: string, subTask: SubTask) => {
     const newStatus = currentStatus === 'COMPLETED' ? 'PENDING' : 'COMPLETED';
 
     try {
       const response = await fetch(
-        `https://task-management-backend-kohl-omega.vercel.app/api/subtasks/update-subtask/${subtaskId}`,
+        `http://localhost:8000/api/subtasks/update-subtask/${subtaskId}`,
         {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            taskId: subTask.taskId,
+            userId: subTask.userId,
             status: newStatus,
-            completedAt: newStatus === 'COMPLETED' ? new Date().toISOString() : null,
+            feedback: subTask.feedback || null,
           }),
         }
       );
@@ -170,10 +173,11 @@ const SubTasks: React.FC<SubTasksProps> = ({ taskId }) => {
             <TableRow>
               <TableCell className="text-text">Title</TableCell>
               <TableCell className="text-text">Assigned To</TableCell>
-              <TableCell className="text-text">Feedback Required</TableCell>
+              {/* <TableCell className="text-text">Feedback Required</TableCell> */}
               <TableCell className="text-text">Time (hours)</TableCell>
               <TableCell className="text-text">Status</TableCell>
-              <TableCell className="text-text">Action</TableCell>
+              <TableCell className="text-text">Feedback</TableCell>
+              {/* <TableCell className="text-text">Action</TableCell> */}
             </TableRow>
           </TableHeader>
 
@@ -201,13 +205,13 @@ const SubTasks: React.FC<SubTasksProps> = ({ taskId }) => {
                   </div>
                 </TableCell>
 
-                <TableCell className="flex-1">
+                {/* <TableCell className="flex-1">
                   <Checkbox
                     checked={task.requiresFeedback}
                     disabled
                     className="h-5 w-5 rounded border-gray-300"
                   />
-                </TableCell>
+                </TableCell> */}
 
                 <TableCell className="flex-1">
                   <div className="flex items-center gap-1 text-text">
@@ -228,10 +232,16 @@ const SubTasks: React.FC<SubTasksProps> = ({ taskId }) => {
                 </TableCell>
 
                 <TableCell className="flex-1">
+                  <div className="text-sm text-gray-600 max-w-[100px] truncate">
+                    {task.feedback || 'No feedback'}
+                  </div>
+                </TableCell>
+
+                {/* <TableCell className="flex-1">
                   <div className="flex gap-2">
                     <Checkbox
                       checked={task.status === 'COMPLETED'}
-                      onCheckedChange={() => handleToggleCompletion(task.id, task.status)}
+                      onCheckedChange={() => handleToggleCompletion(task.id, task.status, task)}
                       className="h-5 w-5 rounded border-gray-300"
                     />
                     <Button
@@ -242,7 +252,7 @@ const SubTasks: React.FC<SubTasksProps> = ({ taskId }) => {
                       <X size={16} />
                     </Button>
                   </div>
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             ))}
           </TableBody>
@@ -264,8 +274,7 @@ const SubTasks: React.FC<SubTasksProps> = ({ taskId }) => {
         <UpdateStatusModal
           isOpen={isStatusModalOpen}
           onOpenChange={setIsStatusModalOpen}
-          taskId={selectedSubTaskForStatusUpdate.id}
-          currentStatus={selectedSubTaskForStatusUpdate.status}
+          subTask={selectedSubTaskForStatusUpdate}
           onStatusUpdated={handleStatusUpdated}
         />
       )}

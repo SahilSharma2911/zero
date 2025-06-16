@@ -5,7 +5,7 @@ import assignTo from '../../../../public/images/assignlogo.png'
 import Image from 'next/image'
 import { CalendarIcon } from 'lucide-react';
 import SubTasks from '../dashboard/Form/SubTasks';
-import CommentsBox from '@/components/CommentsBox';
+import CommentsWrapper from './CommentsWrapper'
 
 interface User {
   id: string;
@@ -124,7 +124,7 @@ const SingleTask: React.FC<SingleTaskProps> = ({ taskId }) => {
   return (
     <div className="flex p-4 w-full h-screen">
       {/* left side section */}
-      <div className="w-full pr-4">
+      <div className="w-2/3 pr-4">
         {/*------ image and title -------- */}
         <div className="flex gap-2 items-center mb-4">
           <div>
@@ -217,9 +217,9 @@ const SingleTask: React.FC<SingleTaskProps> = ({ taskId }) => {
       </div>
 
       {/* right side section of Comments */}
-      {/* <div className="w-1/2 pl-4 border-l">
-        <CommentsBox />
-      </div> */}
+      <div className="w-1/3 pl-4 border-l">
+        <CommentsWrapper taskId={taskId} />
+      </div>
     </div>
   );
 };
